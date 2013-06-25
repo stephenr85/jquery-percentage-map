@@ -9,11 +9,8 @@
 		var I = this,
 			o = $.extend({}, arguments.callee.defaults, options),
 			deferred = $.Deferred(),
-			resize = function (img) {
+			resize = function (img, naturalWidth, naturalHeight) {
 	            var $img = $(img),
-					$sizeImg = $('<img src="'+$img.attr('src')+'">'),					
-					naturalWidth = $sizeImg.prop('width'),
-					naturalHeight = $sizeImg.prop('height'),
 					width = $img.width(),
 					height = $img.height(),
 					$map = $('map[name="'+ $img.attr('usemap').replace('#','') +'"]');
@@ -52,12 +49,19 @@
 		
 		this.each(function(i, img){
 			
-			if(img.complete){
-				resize(img);
+			var sizeImg = new Image(),
+				loaded = function(){
+					var width = sizeImg.naturalWidth || sizeImg.width,
+						height = sizeImg.naturalHeight || sizeImg.height;
+					resize(img, width, height);	
+				};
+				
+			sizeImg.src = img.src;
+			
+			if(sizeImg.complete){
+				loaded();
 			}else{
-				$(img).load(function(){
-					resize(img);
-				});
+				$(sizeImg).load(loaded);
 			}
 			
 		});
@@ -76,7 +80,7 @@
 	
 	
 	$.fn.percentageMap.defaults = {
-		throttleTime: 250	
+		throttleTime: 250
 	};
 	
 })(jQuery);
